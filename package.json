@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "type" : "module",
+  "type": "commonjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev" : "nodemon src/index.js"
+    "dev": "nodemon src/index.js"
   },
   "repository": {
     "type": "git",
@@ -15,9 +15,11 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
   "bugs": {
     "url": "https://github.com/DivyanshuSindhu09/Youtube-Backend/issues"
   },
-  "homepage": "https://github.com/DivyanshuSindhu09/Youtube-Backend#readme"
+  "homepage": "https://github.com/DivyanshuSindhu09/Youtube-Backend#readme",
+  "devDependencies": {
+    "prettier": "^3.6.2"
+  }
 }

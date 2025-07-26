@@ -17,6 +17,7 @@ const registerUser = asyncHandler ( async (req, res) => {
         // ? return res to the user
         
         const {username, email, fullName,  password} = req.body
+        console.log(req.body)
         console.log(username, email, fullName, password)
 
         // ? validation
@@ -39,7 +40,10 @@ const registerUser = asyncHandler ( async (req, res) => {
             throw new ApiError(409 ,'User Already Exists')
         }
 
+        console.log('Iske aage clg files hoga')
         console.log(req.files)
+        console.log('Controller ka console')
+        console.log(req.files?.avatar)
         
         const avatarLocalPath = req.files?.avatar[0]?.path
         const coverImageLocalPath = req.files?.coverImage[0]?.path
@@ -82,3 +86,73 @@ const registerUser = asyncHandler ( async (req, res) => {
 } )
 
 export {registerUser}
+
+/*
+Controller ka console
+[
+  {
+    fieldname: 'avatar',
+    originalname: 'images.jpeg',
+    encoding: '7bit',
+    mimetype: 'image/jpeg',
+    destination: './public/temp',
+    filename: 'images.jpeg',
+    path: 'public\\temp\\images.jpeg',
+    size: 9249
+  }
+]
+*/
+
+/*
+req.files
+[Object: null prototype] {
+  avatar: [
+    {
+      fieldname: 'avatar',
+      originalname: 'images.jpeg',
+      encoding: '7bit',
+      mimetype: 'image/jpeg',
+      destination: './public/temp',
+      filename: 'images.jpeg',
+      path: 'public\\temp\\images.jpeg',
+      size: 9249
+    }
+  ],
+  coverImage: [
+    {
+      fieldname: 'coverImage',
+      originalname: 'fis.JPG',
+      encoding: '7bit',
+      mimetype: 'image/jpeg',
+      destination: './public/temp',
+      filename: 'fis.JPG',
+      path: 'public\\temp\\fis.JPG',
+      size: 51151
+    }
+  ]
+}
+*/
+
+/*
+req.body
+[Object: null prototype] {
+  fullName: 'Divyanshu Sindhu',
+  email: 'divya.nshu@.com',
+  password: '564sf2s1fde',
+  username: 'jaat_raaj'
+}
+*/
+
+/*
+database entry -
+"_id": "688511f10381b6194f8f33bb",
+        "username": "jaat_raaj",
+        "email": "divya.nshu@.com",
+        "fullName": "Divyanshu Sindhu",
+        "avatar": "http://res.cloudinary.com/difclqflf/image/upload/v1753551343/y8u6ask29mh7i0lscubh.jpg",
+        "coverImage": "http://res.cloudinary.com/difclqflf/image/upload/v1753551344/sjehvhks8g3phzladiel.jpg",
+        "watchHistory": [],
+        "createdAt": "2025-07-26T17:35:45.293Z",
+        "updatedAt": "2025-07-26T17:35:45.293Z",
+        "__v": 0
+*/

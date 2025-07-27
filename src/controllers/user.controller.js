@@ -46,7 +46,15 @@ const registerUser = asyncHandler ( async (req, res) => {
         console.log(req.files?.avatar)
         
         const avatarLocalPath = req.files?.avatar[0]?.path
-        const coverImageLocalPath = req.files?.coverImage[0]?.path
+        //const coverImageLocalPath = req.files?.coverImage[0]?.path
+
+
+        //! check for coverImage
+        let coverImageLocalPath;
+        if ( req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0  ) {
+          coverImageLocalPath = req.files.coverImage[0].path
+          //! ab undefined nhi dikhaega
+        }
 
         if (!avatarLocalPath) {
             throw new ApiError(400, 'Avatar File Is Required')
@@ -139,14 +147,14 @@ req.body
   fullName: 'Divyanshu Sindhu',
   email: 'divya.nshu@.com',
   password: '564sf2s1fde',
-  username: 'jaat_raaj'
+  username: 'devansh_jaat'
 }
 */
 
 /*
 database entry -
 "_id": "688511f10381b6194f8f33bb",
-        "username": "jaat_raaj",
+        "username": "devansh_jaat",
         "email": "divya.nshu@.com",
         "fullName": "Divyanshu Sindhu",
         "avatar": "http://res.cloudinary.com/difclqflf/image/upload/v1753551343/y8u6ask29mh7i0lscubh.jpg",

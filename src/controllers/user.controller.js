@@ -1,8 +1,29 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
-import {ApiError} from '../utils/ApiError.js'
+import { ApiError } from '../utils/ApiError.js'
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/ApiResponse.js";
+
+
+// ! this function will be used at the time of login
+const generateAccessandRefreshTokens = async (userId) => {
+  try {
+    const user = await User.findById(userId)
+    const accessToken = user.generateAccessToken()
+    const refreshToken = user.generateRefreshToken()
+
+    // ! saving in our database
+    user.refreshToken = refreshToken
+    await user.save( {validateBeforeSave : false} )
+    // ? taki koi pass etc. wali validation kick in na ho isme
+
+    return {accessToken, refreshToken}
+
+  } catch (error) {
+    throw new ApiError(500, "Something went wrong while generating refresh and access token")
+  }
+}
+
 
 const registerUser = asyncHandler ( async (req, res) => {
 
@@ -93,7 +114,47 @@ const registerUser = asyncHandler ( async (req, res) => {
         )
 } )
 
-export {registerUser}
+const loginUser = asyncHandler( async (req, res) => {
+  // ? fetch data from user
+  // ? check if data is not empty
+  // ? find for given username or password
+  // ? validate password
+  // ? generate access token and refresh tokens to the user
+  // ? send cookies to the user 
+
+  const { username, email, password } = req.body
+
+  if(!username || !email){
+    throw new ApiError(400, 'Username or email is required')
+  }
+
+  const user = await User.findOne({
+    $or : [ {username} , {email} ]
+  })
+
+  if(!user){
+    throw new ApiError(404, "User Does Not Exist")
+  }
+
+  // ! ye hamara banaya hua function hai mongo ka nhi toh ise hum apne user se access kr skte hai
+  // ! mongo db ke User se nhi 
+  const isPasswordValid = await user.isPasswordCorrect(password)
+
+  if(!isPasswordValid){
+    throw new ApiError(401, "Credentials Are Incorrect")
+  }
+
+  // !sahi password hai
+  const {accessToken, refreshToken} = await generateAccessandRefreshTokens(user._id)
+
+  
+
+} )
+
+export {
+  registerUser,
+  loginUser
+}
 
 /*
 Controller ka console

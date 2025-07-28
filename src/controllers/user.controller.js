@@ -146,8 +146,25 @@ const loginUser = asyncHandler( async (req, res) => {
 
   // !sahi password hai
   const {accessToken, refreshToken} = await generateAccessandRefreshTokens(user._id)
+  // ? hamare paas jis user ka reference hai uska refreshToken empty hai
 
-  
+  const loggedInUser = User.findById(user._id).select("-password -refreshToken")
+
+  const options = {
+    httpOnly : true,
+    secure : true
+  }
+  return res.status(200).cookie("accessToken", accessToken, options).cookie("refreshToken", refreshToken, options).json(
+    new ApiResponse(
+      200,
+      {
+        user: loggedInUser,
+        accessToken,
+        refreshToken
+      },
+      "Usr Logged In Successfully"
+    )
+  )
 
 } )
 

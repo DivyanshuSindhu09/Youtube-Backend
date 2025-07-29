@@ -154,6 +154,8 @@ const loginUser = asyncHandler( async (req, res) => {
     httpOnly : true,
     secure : true
   }
+
+  // ! hum cookie req or res dono mein access kr skte hain
   return res.status(200).cookie("accessToken", accessToken, options).cookie("refreshToken", refreshToken, options).json(
     new ApiResponse(
       200,

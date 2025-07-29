@@ -124,7 +124,7 @@ const loginUser = asyncHandler( async (req, res) => {
 
   const { username, email, password } = req.body
 
-  if(!username || !email){
+  if(!username && !email){
     throw new ApiError(400, 'Username or email is required')
   }
 
@@ -148,7 +148,7 @@ const loginUser = asyncHandler( async (req, res) => {
   const {accessToken, refreshToken} = await generateAccessandRefreshTokens(user._id)
   // ? hamare paas jis user ka reference hai uska refreshToken empty hai
 
-  const loggedInUser = User.findById(user._id).select("-password -refreshToken")
+  const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
 
   const options = {
     httpOnly : true,
@@ -164,7 +164,7 @@ const loginUser = asyncHandler( async (req, res) => {
         accessToken,
         refreshToken
       },
-      "Usr Logged In Successfully"
+      "User Logged In Successfully"
     )
   )
 

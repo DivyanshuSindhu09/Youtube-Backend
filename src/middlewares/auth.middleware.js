@@ -1,10 +1,10 @@
-import { ApiError } from "../utils/ApiError";
-import { asyncHandler } from "../utils/asyncHandler";
+import { ApiError } from "../utils/ApiError.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 import jwt from "jsonwebtoken"
 import { User } from "../models/user.model.js" 
 
 //! agar res wali field empty hoti hai toh production mein use _ se replace krdete hain
- export const verifyJWT = asyncHandler( async (req, res, next) => {
+  const verifyJWT = asyncHandler( async (req, res, next) => {
     try {
         // ! Header -> Key - Authorization ; 
         // ! Value -> Bearer <token>
@@ -31,3 +31,5 @@ import { User } from "../models/user.model.js"
         throw new ApiError(401, error.message || "Invalid Access Token")
     }
  } )
+
+ export  {verifyJWT}

@@ -252,11 +252,36 @@ const refreshAccessToken = asyncHandler( async (req, res) => {
 
 } )
 
+const updateCurrentPassword = asyncHandler( async (req, res) => {
+  const { oldPassword, newPassword } = req.body
+
+  //! from auth middleware
+
+  const user = await User.findById(req.user._id)
+  
+  if (!user) {
+    throw new ApiError(404, "User Not Found")
+  }
+
+  const isPasswordCorrect = await user.isPasswordCorrect(oldPassword)
+  if (!isPasswordCorrect) {
+    throw new ApiError(400, "Given Password Is Incorrect")
+  }
+
+  user.password = newPassword
+  await user.save({ validateBeforeSave: false })
+
+  return res.status(200).json(
+    new ApiResponse(200, {}, "Password Updated Successfully")
+  )
+})
+
 export {
   registerUser,
   loginUser,
   logoutUser,
-  refreshAccessToken
+  refreshAccessToken,
+  updateCurrentPassword
 }
 
 /*

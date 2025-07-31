@@ -441,6 +441,9 @@ const channel = await User.aggregate([
   )
 })
 
+//! watch history functionality
+//! nested lookup
+//! aggregation pipeline mein mongoose interfere nhi krta
 
 export {
   registerUser,

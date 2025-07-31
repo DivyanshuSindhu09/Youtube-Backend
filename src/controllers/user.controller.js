@@ -276,12 +276,106 @@ const updateCurrentPassword = asyncHandler( async (req, res) => {
   )
 })
 
+const getCurrentUser = asyncHandler( async (req, res) => {
+  //! from auth middleware
+  return res.status(200).json(
+    new ApiResponse(200, req.user, "Current User Fetched Successfully")
+  ) 
+})
+
+const updateAccountDetails = asyncHandler( async (req, res) => {
+  const { fullName, email } = req.body
+
+  if (!email || !fullName) {
+    throw new ApiError(400, "All Fields Are Required")
+  }
+
+  const user = User.findByIdAndDelete(
+    req.user?._id,
+    {
+      $set : {
+        fullName,
+        email //! this is updated
+      }
+    },
+    {new : true}
+  ).select("-password")
+
+  return res.status(200).json(
+    new ApiResponse(200, user, "User Details Updated Successfully")
+  )
+})
+
+const updateUserAvatar = asyncHandler (async (req, res) =>{
+  const avatarLocalPath = req.file?.path //! yaha pe humne files ki jagah file likha h kyuki hum starting mein jyada jagah files upload krne ka option de rhe the
+
+  if (!avatarLocalPath) {
+    throw new ApiError(400, "Avatar File Is Missing")
+  }
+
+  const avatar = await uploadOnCloudinary(avatarLocalPath)
+
+  if (!avatar?.url) {
+    throw new ApiError(400, "Error While Uploading Avatar")
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.user?._id,
+    {
+      $set:{
+        avatar: avatar.url //! this is updated
+      }
+    },{
+      new: true,
+    }
+  )
+
+  return res.status(200).json(
+    new ApiResponse(200, user, "Avatar Updated Successfully")
+  )
+} )
+
+
+const updateUserCoverImage = asyncHandler (async (req, res) =>{
+  const coverImageLocalPath = req.file?.path //! yaha pe humne files ki jagah file likha h kyuki hum starting mein jyada jagah files upload krne ka option de rhe the
+
+  if (!coverImageLocalPath) {
+    throw new ApiError(400, "Avatar File Is Missing")
+  }
+
+  const coverImage = await uploadOnCloudinary(coverImageLocalPath)
+
+  if (!coverImage?.url) {
+    throw new ApiError(400, "Error While Uploading Cover Image")
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.user?._id,
+    {
+      $set:{
+        coverImage: coverImage.url //! this is updated
+      }
+    },{
+      new: true,
+    }
+  )
+
+  return res.status(200).json(
+    new ApiResponse(200, user, "Cover Image Updated Successfully")
+  )
+} )
+
+
 export {
   registerUser,
   loginUser,
   logoutUser,
   refreshAccessToken,
-  updateCurrentPassword
+  updateCurrentPassword,
+  getCurrentUser,
+  updateAccountDetails,
+  updateUserAvatar,
+  updateUserCoverImage
 }
 
 /*
@@ -353,3 +447,19 @@ database entry -
         "updatedAt": "2025-07-26T17:35:45.293Z",
         "__v": 0
 */
+
+// let fullname = "John Doe";
+// let email = ""; // Falsy
+
+// if (!fullname || !email) {
+// This code WILL run because email is falsy.
+//   console.log("At least one field is missing.");
+// }
+
+// let fullname = "John Doe";
+// let email = ""; // Falsy
+
+// if (!(fullname || email)) {
+// This code WILL NOT run because fullname is truthy.
+//   console.log("Both fields are missing.");
+// }

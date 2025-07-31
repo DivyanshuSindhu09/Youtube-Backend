@@ -4,6 +4,7 @@ import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken"
+import mongoose from "mongoose";
 
 // ! this function will be used at the time of login
 const generateAccessandRefreshTokens = async (userId) => {
@@ -444,6 +445,55 @@ const channel = await User.aggregate([
 //! watch history functionality
 //! nested lookup
 //! aggregation pipeline mein mongoose interfere nhi krta
+//! mongoDB ki id = ObjectId('String')
+//! _id mein hame string milta hai
+//! mongoose behind the scene is string ko mondoDB ki id mein convert krta hai
+
+//! hamare paas aggregate se array aata hai uska datastructure improve kr skte h
+
+const getWatchHistory = asyncHandler( async(req, res)=> {
+  const user = await User.aggregate([
+    {
+      $match : {
+        _id : new mongoose.Types.ObjectId(req.user?._id)
+      }
+    },
+    {
+      $lookup:{
+        from:"videos",
+        localField:"watchHistory",
+        foreignField: "_id",
+        as : "watchHistory", //! subpipeline
+        pipeline:[
+          {
+            $lookup:{
+              from:"users",
+              localField:"owner",
+              foreignField:"_id",
+              as:"owner",
+              pipeline:[
+                {
+                  $project:{
+                    fullName : 1,
+                    username : 1,
+                    avatar : 1
+                  }
+                },               
+              ]
+            }
+          },
+          {
+              $addFields:{
+                owner : { //! sara data pipelines se owner mein agya hai ab use modify krte h
+                $first:"$owner" //? ab hame direct object ka access milega jo array[0] pe tha
+              }
+            }
+          }
+        ]
+      }
+    },
+  ])
+})
 
 export {
   registerUser,
@@ -455,7 +505,8 @@ export {
   updateAccountDetails,
   updateUserAvatar,
   updateUserCoverImage,
-  getUserChannelProfile
+  getUserChannelProfile,
+  getWatchHistory
 }
 
 /*

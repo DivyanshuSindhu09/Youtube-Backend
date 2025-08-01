@@ -291,7 +291,7 @@ const updateAccountDetails = asyncHandler( async (req, res) => {
     throw new ApiError(400, "All Fields Are Required")
   }
 
-  const user = User.findByIdAndDelete(
+  const user = User.findByIdAndUpdate(
     req.user?._id,
     {
       $set : {

@@ -8,8 +8,17 @@ import {uploadOnCloudinary} from "../utils/cloudinary.js"
 
 
 const getAllVideos = asyncHandler(async (req, res) => {
+    //! paramas are used for unique identifiers
+    //! querys are used for key value pairs
     const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query
+    //! console.log(req.query.page)
+    //! (page=2&limit=10)
     //TODO: get all videos based on query, sort, pagination
+    const allVideos = await Video.find({})
+
+    return res.status(200).json(
+        new ApiResponse(200, allVideos, "Videos Fetched Successfully")
+    )
 })
 
 const publishAVideo = asyncHandler(async (req, res) => {
@@ -17,9 +26,13 @@ const publishAVideo = asyncHandler(async (req, res) => {
     if(!title || !description){
         throw new ApiError(400, "Both Title and Description are required")
     }
-
     const videoLocalPath = req.files?.videoFile[0]?.path 
     const thumbnailLocalPath = req.files?.thumbnail[0]?.path
+    
+    console.log("File")
+    console.log(req.files)
+    console.log(req.files.videoFile)
+    console.log("Testing")
 
     if(!videoLocalPath){
         throw new ApiError(400, "Video File Is Required")
@@ -33,9 +46,9 @@ const publishAVideo = asyncHandler(async (req, res) => {
     const thumbnail = await uploadOnCloudinary(thumbnailLocalPath)
     console.log("video details", video)
 
-   
-
-    const {username} = await User.findById(req?.user?._id)
+    if(!video || !thumbnail){
+        throw new ApiError(500, "Failed to upload video or thumbnail")
+    }
 
     const publishedVideo = await Video.create({
         title,
@@ -49,7 +62,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
     return res.status(200).json(
         new ApiResponse(200, publishedVideo, "Video Uploaded Successfully")
     )
-    // TODO: get video, upload to cloudinary, create video
+    
 })
 
 const getVideoById = asyncHandler(async (req, res) => {
@@ -66,7 +79,47 @@ const getVideoById = asyncHandler(async (req, res) => {
 
 const updateVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params
+    const {title, description} = req.body
+
+    if(!title || !description){
+        throw new ApiError(400, "All Fields Are Required")
+    }
+
+    //! thumbnail
+    console.log(req.file)
+    const thumbnailLocalPath = req.file?.path
+
+    if(!thumbnailLocalPath){
+        throw new ApiError(400, "Thumbnail is required")
+    }
+
+    const thumbnail = await uploadOnCloudinary(thumbnailLocalPath)
+
+    if(!thumbnail){
+        throw new ApiError(500, "Failed to upload thumbnail")}
+
+    const video = await Video.findByIdAndUpdate(
+        videoId,
+        {
+            $set:{
+                title,
+                description,
+                thumbnail : thumbnail.url
+            }
+        },
+        {new : true}
+    )
+
+    if(!video){
+        throw new ApiError(404, "Video Not Found")
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, video, "Details Changed Successfully")
+    )
+
     //TODO: update video details like title, description, thumbnail
+
 
 })
 
@@ -87,3 +140,17 @@ export {
     deleteVideo,
     togglePublishStatus
 }
+
+/*
+req.file 
+{
+  fieldname: 'thumbnail',
+  originalname: 'fis.JPG',
+  encoding: '7bit',
+  mimetype: 'image/jpeg',
+  destination: './public/temp',
+  filename: 'fis.JPG',
+  path: 'public\\temp\\fis.JPG',
+  size: 51151
+}
+*/

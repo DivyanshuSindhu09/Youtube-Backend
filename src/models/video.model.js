@@ -23,7 +23,8 @@ const videoSchema = new mongoose.Schema({
     },
     duration : {
         type : Number, //clodinary
-        required : true
+        required : true,
+        default : 0
     },
     views:{
         type : Number,
@@ -33,6 +34,7 @@ const videoSchema = new mongoose.Schema({
     isPublished:{
         type : Boolean,
         required : true,
+        default : false
     },
     owner : {
         type : mongoose.Schema.Types.ObjectId,

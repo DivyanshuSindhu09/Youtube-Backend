@@ -158,6 +158,23 @@ const deleteVideo = asyncHandler(async (req, res) => {
 
 const togglePublishStatus = asyncHandler(async (req, res) => {
     const { videoId } = req.params
+
+    if(!isValidObjectId(videoId)){
+        throw new ApiError(400, "Invalid Video ID")
+    }
+
+    const video = await Video.findById(videoId)
+
+    if(!video){
+        throw new ApiError(404, "Video Not Found")
+    }
+
+    video.isPublished = !video.isPublished
+    await video.save()
+
+    return res.status(200).json(
+        new ApiResponse(200, video, `Video is now ${video.isPublished ? "Published" : "Unpublished"}`)
+    )
 })
 
 export {

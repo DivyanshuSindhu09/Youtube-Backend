@@ -125,6 +125,31 @@ const updateVideo = asyncHandler(async (req, res) => {
 
 const deleteVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params
+    const userId = req.user._id
+    console.log("user id",userId)
+    //! user id new ObjectId('688cb7c0945c0580042d2c82')
+    console.log(userId.toString())
+    //!688cb7c0945c0580042d2c82 
+    console.log("video id",videoId)
+
+    const video = await Video.findById(videoId)
+    console.log("video",video)
+
+    //!video.owner : new ObjectId('688cb7c0945c0580042d2c82'),
+    if(video.owner.toString() !== userId.toString()){
+        throw new ApiError(400, "Unauthorized Request To Delete")
+    }
+
+    const deletedVideo = await Video.findByIdAndDelete(videoId)
+
+    if(!deletedVideo){
+        throw new ApiError(400, "An error occured while deleting the video")
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, null, "Video Deleted Successfully")
+    )
+
     //TODO: delete video
 })
 

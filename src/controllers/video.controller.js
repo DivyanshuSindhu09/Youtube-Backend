@@ -70,8 +70,11 @@ const getVideoById = asyncHandler(async (req, res) => {
     if (!videoId) {
         throw new ApiError(400, "VIDEO'S ID IS REQUIRED")
     }
-    const video = await Video.findById(videoId)
-
+    const video = await Video.findById(videoId).populate({
+        path: "owner",
+        select: "username email fullName"
+    })
+    //! populate se owner ka object add hojaega jisme id, username, email and fullName hoga
     return res.status(200).json(
         new ApiResponse (200, video, "Video Fetched Successfully")
     )

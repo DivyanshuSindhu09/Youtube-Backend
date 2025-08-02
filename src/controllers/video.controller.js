@@ -19,9 +19,10 @@ const getAllVideos = asyncHandler(async (req, res) => {
 
     // --- 2. Create the $match stage dynamically ---
     const matchStage = {};
+    //! matchstagei is used to filter documents based on certain criteria
 
     // Only include published videos
-    // matchStage.isPublished = true;
+    matchStage.isPublished = true;
 
     // Add text search to match stage ONLY if a query is provided
     if (query) {
@@ -54,7 +55,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
                     $project: {
                         username: 1,
                         fullName: 1,
-                        "avatar.url": 1, // Project the URL directly
+                        avatar: 1, // Project the URL directly
                     },
                 },
             ],

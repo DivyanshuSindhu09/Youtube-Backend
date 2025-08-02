@@ -56,7 +56,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
         videoFile : video.url,
         thumbnail : thumbnail.url,
         duration : video.duration,
-        
+        owner : req.user._id
     })
 
     return res.status(200).json(
@@ -152,5 +152,35 @@ req.file
   filename: 'fis.JPG',
   path: 'public\\temp\\fis.JPG',
   size: 51151
+}
+*/
+
+/*
+req.files
+[Object: null prototype] {
+  thumbnail: [
+    {
+      fieldname: 'thumbnail',
+      originalname: 'fis.JPG',
+      encoding: '7bit',
+      mimetype: 'image/jpeg',
+      destination: './public/temp',
+      filename: 'fis.JPG',
+      path: 'public\\temp\\fis.JPG',
+      size: 51151
+    }
+  ],
+  videoFile: [
+    {
+      fieldname: 'videoFile',
+      originalname: 'loader.mp4',
+      encoding: '7bit',
+      mimetype: 'video/mp4',
+      destination: './public/temp',
+      filename: 'loader.mp4',
+      path: 'public\\temp\\loader.mp4',
+      size: 1107253
+    }
+  ]
 }
 */

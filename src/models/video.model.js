@@ -15,11 +15,13 @@ const videoSchema = new mongoose.Schema({
     },
     title : {
         type : String,
-        required : true
+        required : true,
+        index : true // for search
     },
     description : {
         type : String,
-        required: true
+        required: true,
+        index : true // for search
     },
     duration : {
         type : Number, //clodinary
@@ -34,7 +36,7 @@ const videoSchema = new mongoose.Schema({
     isPublished:{
         type : Boolean,
         required : true,
-        default : false
+        default : true
     },
     owner : {
         type : mongoose.Schema.Types.ObjectId,
@@ -42,6 +44,9 @@ const videoSchema = new mongoose.Schema({
     }
 }, {timestamps : true})
 
+
+//! search functionality
+videoSchema.index({ title: "text", description: "text" });
 
 videoSchema.plugin(mongooseAggregatePaginate)
 

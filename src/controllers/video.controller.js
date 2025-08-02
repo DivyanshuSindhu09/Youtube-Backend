@@ -14,11 +14,103 @@ const getAllVideos = asyncHandler(async (req, res) => {
     //! console.log(req.query.page)
     //! (page=2&limit=10)
     //TODO: get all videos based on query, sort, pagination
-    const allVideos = await Video.find({})
+   // --- 1. Build the base aggregation pipeline ---
+    const pipeline = [];
 
-    return res.status(200).json(
-        new ApiResponse(200, allVideos, "Videos Fetched Successfully")
-    )
+    // --- 2. Create the $match stage dynamically ---
+    const matchStage = {};
+
+    // Only include published videos
+    // matchStage.isPublished = true;
+
+    // Add text search to match stage ONLY if a query is provided
+    if (query) {
+        // You must have a text index on title/description for this to work
+        // e.g., videoSchema.index({ title: "text", description: "text" });
+        matchStage.$text = { $search: query };
+    }
+
+    // Add owner filter to match stage ONLY if a userId is provided
+    if (userId) {
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            throw new ApiError(400, "Invalid userId format");
+        }
+        matchStage.owner = new mongoose.Types.ObjectId(userId);
+    }
+    
+    // Add the completed match stage to the pipeline
+    pipeline.push({ $match: matchStage });
+
+
+    // --- 3. Add the $lookup stage to get owner details ---
+    pipeline.push({
+        $lookup: {
+            from: "users",
+            localField: "owner",
+            foreignField: "_id",
+            as: "ownerDetails", // Use a different name to avoid confusion
+            pipeline: [
+                {
+                    $project: {
+                        username: 1,
+                        fullName: 1,
+                        "avatar.url": 1, // Project the URL directly
+                    },
+                },
+            ],
+        },
+    });
+
+    // Deconstruct the ownerDetails array to a single object
+    pipeline.push({
+        $addFields: {
+            owner: {
+                $first: "$ownerDetails",
+            },
+        },
+    });
+
+
+    // --- 4. Create the $sort stage dynamically ---
+    const sortStage = {};
+    if (sortBy && sortType) {
+        // Sort by the provided field and type
+        sortStage[sortBy] = sortType === 'asc' ? 1 : -1;
+    } else if (query) {
+        // If there's a search query, sort by relevance (textScore) first
+        sortStage.score = { $meta: "textScore" };
+    } else {
+        // Default sort: newest videos first
+        sortStage.createdAt = -1;
+    }
+
+    pipeline.push({ $sort: sortStage });
+    
+
+    // --- 5. Remove the extra ownerDetails field ---
+    pipeline.push({
+        $project: {
+            ownerDetails: 0 // Exclude the now-redundant array
+        }
+    })
+
+
+    // --- 6. Execute the pipeline with pagination ---
+    const options = {
+        page: parseInt(page, 10),
+        limit: parseInt(limit, 10),
+    };
+
+    const videoAggregate = Video.aggregate(pipeline);
+    const videos = await Video.aggregatePaginate(videoAggregate, options);
+
+    if (!videos) {
+        throw new ApiError(500, "Something went wrong while fetching videos");
+    }
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, videos, "Videos fetched successfully"));
 })
 
 const publishAVideo = asyncHandler(async (req, res) => {
